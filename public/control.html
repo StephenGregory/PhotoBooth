@@ -1,0 +1,162 @@
+<html>
+
+<head>
+    <title>Photobooth Gallery</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/async@2.6.0/dist/async.min.js"></script>
+    <link href="//fonts.googleapis.com/css?family=Roboto:400,100,400italic,700italic,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="css/booth.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flickity@2/dist/flickity.css">
+    <script src="https://npmcdn.com/flickity@2/dist/flickity.pkgd.js"></script>
+    <style>
+        @media (min-width: 650px) {
+            html:before {
+                content: '';
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+                margin-right: -0.25em;
+            }
+
+            body {
+                display: inline-block;
+                vertical-align: middle;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="notification-bar"></div>
+
+    <div id="check-out">
+        Check these out!
+    </div>
+
+    <div id="recent-images" class="gallery">
+    </div>
+
+    <div id="trigger" class="tap animated" data-state="enabled">
+        Tap Here
+        <br/>
+        <i class="fa fa-camera-retro fa-3x"></i>
+        <br/>Take 3 Photos
+    </div>
+</body>
+<script>
+    let ws = new WebSocket(`ws://${location.host}`);
+
+    const $notificationBar = $('#notification-bar');
+    ws.onopen = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('info');
+        $notificationBar.text('Connected to server');
+        $notificationBar.fadeIn(1000, () => $notificationBar.fadeOut(1000));
+    };
+    ws.onclose = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('warning');
+        $notificationBar.text('Lost connection to the server.');
+        $notificationBar.fadeIn(1000);
+    };
+    ws.onerror = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('error');
+        $notificationBar.text('Something is wrong with the connection to the server. Try refreshing.');
+        $notificationBar.fadeIn(1000);
+    };
+
+    const $trigger = $('#trigger');
+    const $recentImages = $('#recent-images');
+    const $checkOut = $('#check-out');
+
+    $recentImages.flickity({
+        imagesLoaded: true,
+        wrapAround: true
+    });
+
+    ws.onmessage = function (message) {
+
+        if (message.data === undefined) {
+            return;
+        }
+
+        const parsedMessage = JSON.parse(message.data);
+
+        if (parsedMessage.type === 'captured-images') {
+            $trigger.removeClass('countdown');
+            $recentImages.flickity('remove', $('.gallery-cell'));
+            $recentImages.fadeIn();
+            $checkOut.fadeIn();
+            console.log(parsedMessage.data.length);
+            parsedMessage.data.forEach((path) => {
+                $img = $('<img>', { src: path });
+                $img.addClass('gallery-cell');
+                $recentImages.flickity('append', $img);
+            });
+            $recentImages.flickity('reloadCells');
+
+            setTimeout(() => {
+                $recentImages.flickity('resize');
+            }, 50);
+
+            $trigger.data().state = 'enabled';
+            $trigger.html(' Tap and take 3 more!').animate();
+        }
+    };
+
+    const animationEndEvents = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+
+    const originalText = $trigger.text();
+    $trigger.click((evt) => {
+        if ($trigger.data().state === 'disabled') {
+            return;
+        }
+        $checkOut.fadeOut();
+        $recentImages.fadeOut();
+        $trigger.data().state = 'disabled';
+
+        async.eachSeries(
+            [{ text: '3', anim: 'bounceOut' },
+            { text: '2', anim: 'zoomIn' },
+            { text: '1', anim: 'zoomIn' },
+            { text: 'Smile!', anim: 'zoomIn' },
+            { text: 'Smile!', anim: 'zoomIn' }],
+            (obj, callback) => {
+
+                $trigger.addClass(obj.anim).one(animationEndEvents, () => {
+                    $trigger.removeClass(obj.anim);
+                    $trigger.hide();
+                    $trigger.text(obj.text);
+                    $trigger.show();
+                    $trigger.addClass('countdown');
+                    return callback(null);
+                });
+            },
+            (err) => {
+                console.log('sending trigger');
+
+                const options = { numberOfPhotos: 3, delay: 2 };
+                setTimeout(() => {
+                    $trigger.removeClass('countdown');
+                    if ($trigger.data().state === 'disabled') {
+                        $trigger.text('Hang tight while we get the photos ready...');
+                    }
+                }, options.delay * options.numberOfPhotos * 1000);
+                ws.send(JSON.stringify({ type: 'trigger-capture', data: { options: options } }));
+            });
+    });
+
+    setInterval(() => {
+        $trigger.addClass('tada').one(animationEndEvents, () => {
+            $trigger.removeClass('tada');
+        });
+    }, 5000);
+
+</script>
+
+</html>

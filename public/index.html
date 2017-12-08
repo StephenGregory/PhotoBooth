@@ -1,0 +1,86 @@
+<html>
+
+<head>
+    <title>Photobooth</title>
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.js"></script>
+    <script src="https://imagesloaded.desandro.com/imagesloaded.pkgd.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/booth.css">
+
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="notification-bar"></div>
+    <h1 id="reel-title">Photo Reel</h1>
+    <div class="grid">
+        <div class="grid-sizer"></div>
+    </div>
+
+</body>
+<script>
+    const $notificationBar = $('#notification-bar');
+    let ws = new WebSocket(`ws://${location.host}`);
+    console.log(ws.readyState);
+    ws.onopen = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('info');
+        $notificationBar.text('Connected to server');
+        $notificationBar.fadeIn(1000, () => $notificationBar.fadeOut(1000));
+    };
+    ws.onclose = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('warning');
+        $notificationBar.text('Lost connection to the server.');
+        $notificationBar.fadeIn(1000);
+    };
+    ws.onerror = function () {
+        $notificationBar.removeClass();
+        $notificationBar.addClass('error');
+        $notificationBar.text('Something is wrong with the connection to the server. Try refreshing.');
+        $notificationBar.fadeIn(1000);
+    };
+
+    var $grid = $('.grid').masonry({
+        itemSelector: '.grid-item',
+        columnWidth: '.grid-sizer',
+        gutter: 50,
+        percentPosition: true
+    });
+
+    ws.onmessage = function (message) {
+        console.debug('message from server: ' + message);
+
+        if (message.data === undefined) {
+            return;
+        }
+
+        const parsedMessage = JSON.parse(message.data);
+
+        if (parsedMessage.type === 'new-images') {
+            parsedMessage.data.sort().forEach((url) => {
+                let $img = $('<img>', { src: url });
+
+                let $div = $('<div>');
+                $div.addClass('grid-item');
+                $div.append($img);
+
+                $grid.prepend($div).masonry('prepended', $div);
+            });
+
+            $grid.imagesLoaded()
+                .progress(() => $grid.masonry('layout'))
+        }
+    };
+
+    ws.onopen = function () {
+        ws.send(JSON.stringify({ type: 'get-all-images', data: null }));
+    };
+</script>
+
+</html>
