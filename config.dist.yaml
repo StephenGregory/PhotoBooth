@@ -1,0 +1,9 @@
+server:
+    port: 3000
+camera:
+    numberOfPhotos: 3            # number of photos to take
+    delay: 3                     # interval, in seconds, between taking photos
+    keepPhotosOnCamera: true     # whether or not to keep photos on camera
+processing:
+    width: 1020                  # dimensions to convert photos from camera to
+    height: 800
