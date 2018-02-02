@@ -140,14 +140,13 @@
             (err) => {
                 console.log('sending trigger');
 
-                const options = { numberOfPhotos: 3, delay: 2 };
                 setTimeout(() => {
                     $trigger.removeClass('countdown');
                     if ($trigger.data().state === 'disabled') {
                         $trigger.text('Hang tight while we get the photos ready...');
                     }
-                }, options.delay * options.numberOfPhotos * 1000);
-                ws.send(JSON.stringify({ type: 'trigger-capture', data: { options: options } }));
+                }, 5 * 1000);
+                ws.send(JSON.stringify({ type: 'trigger-capture', data: {} }));
             });
     });
 

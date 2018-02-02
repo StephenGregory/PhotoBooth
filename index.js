@@ -6,6 +6,7 @@ const fs = require('fs');
 const WebSocket = require('ws');
 const winston = require('winston');
 const request = require('request');
+const yaml = require('js-yaml');
 
 const Capture = require('./lib/capture');
 const ImageProcessor = require('./lib/image-modifier');
@@ -17,10 +18,40 @@ winston.configure({
     ]
 });
 
+let customConfig = {};
+
+try {
+    if (fs.existsSync('./config.yaml')) {
+        customConfig = yaml.safeLoad(fs.readFileSync('./config.yaml'));
+    }
+}
+catch (err) {
+    winston.error('Could not read configuration', err);
+    process.exit(1);
+}
+
+const defaultConfig = {
+    server: {
+        port: 3000
+    },
+    camera: {
+        numberOfPhotos: 3,
+        delay: 3,
+        keepPhotosOnCamera: true
+    },
+    processing: {
+        width: 1280,
+        height: 800
+    }
+}
+
+var config = {};
+Object.assign(config, defaultConfig, customConfig);
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-const port = process.env.PORT || 3000;
+const port = config.server.port;
 
 app.use(express.static('public'));
 
@@ -32,9 +63,9 @@ wss.broadcast = function broadcast(data) {
     });
 };
 
-const capture = new Capture(false, '/tmp/');
+const capture = new Capture(config.camera.keepPhotosOnCamera, '/tmp/');
 let options = {
-    width: 1020
+    width: config.processing.width || 1020
 };
 const processor = new ImageProcessor(options);
 
@@ -49,7 +80,7 @@ wss.on('connection', (ws, req) => {
         switch (parsedMsg.type) {
             case 'trigger-capture': {
                 winston.info('Triggering capture');
-                capture.capture(parsedMsg.data.options.numberOfPhotos, parsedMsg.data.options.delay, (err, paths) => {
+                capture.capture(config.camera.numberOfPhotos, config.camera.delay, (err, paths) => {
                     if (err) {
                         winston.error('Could not capture images', err);
                         return;
