@@ -14,10 +14,29 @@ displayed neatly in a gallery.
 
 ## Setup
 
-Install npm dependencies and start the app.
+Install npm dependencies.
 
 ```
 npm install
+```
+
+To change the configuration options, copy config.dist.yaml to config.yaml and adjust any of the values. All options are optional. The defaults are below:
+
+```
+server:
+    port: 3000
+camera:
+    numberOfPhotos: 3
+    delay: 3
+    keepPhotosOnCamera: true
+processing:
+    width: 1020
+    height: 800
+```
+
+Start the app:
+
+```
 npm start
 ```
 
