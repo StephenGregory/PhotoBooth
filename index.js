@@ -7,6 +7,7 @@ const WebSocket = require('ws');
 const winston = require('winston');
 const request = require('request');
 const yaml = require('js-yaml');
+var expressHandlebars = require('express-handlebars');
 
 const Capture = require('./lib/capture');
 const ImageProcessor = require('./lib/image-modifier');
@@ -42,6 +43,9 @@ const defaultConfig = {
     processing: {
         width: 1280,
         height: 800
+    },
+    app: {
+        title: 'My Photo Reel'
     }
 }
 
@@ -53,7 +57,17 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const port = config.server.port;
 
+app.engine('handlebars', expressHandlebars({}));
+app.set('view engine', 'handlebars');
 app.use(express.static('public'));
+
+app.get('/', function (req, res) {
+    res.render('index', { title: config.app.title });
+});
+
+app.get('/control', function (req, res) {
+    res.render('control', { numberOfPhotos: config.camera.numberOfPhotos });
+});
 
 wss.broadcast = function broadcast(data) {
     wss.clients.forEach(function each(client) {

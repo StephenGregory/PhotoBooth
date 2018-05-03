@@ -7,3 +7,5 @@ camera:
 processing:
     width: 1020                  # dimensions to convert photos from camera to
     height: 800
+app:
+    title: 'My Photo Reel'

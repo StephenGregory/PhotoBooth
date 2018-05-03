@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Photobooth Gallery</title>
+    <title>Photobooth Control</title>
 
     <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet" type="text/css">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -44,7 +44,7 @@
         Tap Here
         <br/>
         <i class="fa fa-camera-retro fa-3x"></i>
-        <br/>Take 3 Photos
+        <br/>Take {{numberOfPhotos}} Photos
     </div>
 </body>
 <script>
@@ -92,7 +92,7 @@
             $recentImages.flickity('remove', $('.gallery-cell'));
             $recentImages.fadeIn();
             $checkOut.fadeIn();
-            console.log(parsedMessage.data.length);
+
             parsedMessage.data.forEach((path) => {
                 $img = $('<img>', { src: path });
                 $img.addClass('gallery-cell');
@@ -105,7 +105,7 @@
             }, 50);
 
             $trigger.data().state = 'enabled';
-            $trigger.html(' Tap and take 3 more!').animate();
+            $trigger.html('Tap and take {{numberOfPhotos}} more!').animate();
         }
     };
 
@@ -138,8 +138,6 @@
                 });
             },
             (err) => {
-                console.log('sending trigger');
-
                 setTimeout(() => {
                     $trigger.removeClass('countdown');
                     if ($trigger.data().state === 'disabled') {
