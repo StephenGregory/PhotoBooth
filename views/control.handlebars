@@ -92,7 +92,7 @@
             $recentImages.flickity('remove', $('.gallery-cell'));
             $recentImages.fadeIn();
             $checkOut.fadeIn();
-            console.log(parsedMessage.data.length);
+
             parsedMessage.data.forEach((path) => {
                 $img = $('<img>', { src: path });
                 $img.addClass('gallery-cell');
@@ -138,8 +138,6 @@
                 });
             },
             (err) => {
-                console.log('sending trigger');
-
                 setTimeout(() => {
                     $trigger.removeClass('countdown');
                     if ($trigger.data().state === 'disabled') {
