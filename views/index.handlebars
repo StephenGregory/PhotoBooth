@@ -25,7 +25,7 @@
 <script>
     const $notificationBar = $('#notification-bar');
     let ws = new WebSocket(`ws://${location.host}`);
-    console.log(ws.readyState);
+
     ws.onopen = function () {
         $notificationBar.removeClass();
         $notificationBar.addClass('info');
@@ -53,8 +53,6 @@
     });
 
     ws.onmessage = function (message) {
-        console.debug('message from server: ' + message);
-
         if (message.data === undefined) {
             return;
         }
