@@ -44,7 +44,7 @@
         Tap Here
         <br/>
         <i class="fa fa-camera-retro fa-3x"></i>
-        <br/>Take 3 Photos
+        <br/>Take {{numberOfPhotos}} Photos
     </div>
 </body>
 <script>
@@ -105,7 +105,7 @@
             }, 50);
 
             $trigger.data().state = 'enabled';
-            $trigger.html(' Tap and take 3 more!').animate();
+            $trigger.html('Tap and take {{numberOfPhotos}} more!').animate();
         }
     };
 

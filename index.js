@@ -66,7 +66,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/control', function (req, res) {
-    res.render('control');
+    res.render('control', { numberOfPhotos: config.camera.numberOfPhotos });
 });
 
 wss.broadcast = function broadcast(data) {
