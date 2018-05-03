@@ -34,6 +34,11 @@
 <body>
     <div id="notification-bar"></div>
 
+    <div id="navigation">
+        <i class="far fa-images"></i>
+        <a href="/">Gallery</a>
+    </div>
+
     <div id="check-out">
         Check these out!
     </div>
@@ -47,6 +52,7 @@
         <i class="fa fa-camera-retro fa-3x"></i>
         <br/>Take {{numberOfPhotos}} Photos
     </div>
+
 </body>
 <script>
     let ws = new WebSocket(`ws://${location.host}`);
