@@ -39,6 +39,26 @@ body {
     background: #06eb4b;
 }
 
+/* Navigation  */
+
+#navigation {
+    position: absolute;
+    left: 2em;
+    top: 1em;
+    font-size: 1.8em;
+}
+
+#navigation a {
+    text-decoration: none;
+}
+
+#navigation a:visited {
+    text-decoration: none;
+}
+#navigation a:active {
+    text-decoration: none;
+}
+
 /* Photo reel */
 
 #reel-title {
