@@ -32,6 +32,8 @@ camera:
 processing:
     width: 1020
     height: 800
+app:
+    title: 'My Photo Reel'
 ```
 
 Start the app:
@@ -47,4 +49,4 @@ photos.
 
 Navigate to localhost:3000 to view a gallery of photos taken by the booth.
 
-Navigate to localhost:3000/control.html to trigger a sequence of photos to be taken.
+Navigate to localhost:3000/control to trigger a sequence of photos to be taken.
